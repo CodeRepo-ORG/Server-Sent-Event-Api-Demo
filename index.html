@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streaming JSON</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        #output {
+            white-space: pre-wrap;
+            /* Maintain the formatting */
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        button {
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>SSE Streaming from FastAPI</h1>
+    <button onclick="startStreaming()">Start Streaming</button>
+    <div id="output"></div>
+
+    <script>
+        function startStreaming() {
+            const outputDiv = document.getElementById("output");
+            outputDiv.textContent = "";  // Clear previous output
+
+            const eventSource = new EventSource("http://localhost:8000/stream");
+            eventSource.addEventListener("start", (event) => {
+                console.log("Start:", event.data);
+                outputDiv.textContent += `[Start] ${event.data}\n`;
+            });
+
+            eventSource.addEventListener("progress", (event) => {
+                console.log("Progress:", event.data);
+                outputDiv.textContent += `[Progress] ${event.data}\n`;
+            });
+
+            eventSource.addEventListener("end", (event) => {
+                console.log("End:", event.data);
+                outputDiv.textContent += `[End] ${event.data}\n`;
+            });
+            eventSource.addEventListener("close", () => {
+                console.log("stop:", event.data)
+                outputDiv.textContent += `[Close] ${event.data}\n`;
+                eventSource.close();
+
+            });
+
+            eventSource.onerror = (error) => {
+                console.error("Error:", error);
+                outputDiv.textContent += `[Error] ${error}\n`;
+                eventSource.close();
+            };
+
+
+        }
+    </script>
+
+</body>
+
+</html>
